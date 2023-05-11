@@ -1,14 +1,18 @@
 
 let grid;
 
-function setup() {
-  createCanvas(400, 400);
-  grid = [
+function blankGrid() {
+  return  [
     [0, 0, 0, 0],
     [0, 0, 0, 0],
     [0, 0, 0, 0],
     [0, 0, 0, 0]
   ];
+}
+
+function setup() {
+  createCanvas(400, 400);
+  grid = blankGrid();
   addNumber();
   addNumber();
 }
@@ -40,12 +44,7 @@ function compare(a, b) {
 }
 
 function copyGrid(grid) {
-  let extra = [
-    [0, 0, 0, 0],
-    [0, 0, 0, 0],
-    [0, 0, 0, 0],
-    [0, 0, 0, 0]
-  ];
+  let extra = blankGrid();
   for (let i = 0; i < 4; i++) {
     for (let j = 0; j < 4; j++) {
       extra[i][j] = grid[i][j];
@@ -54,38 +53,68 @@ function copyGrid(grid) {
   return extra;
 }
 
-function flip(grid) {
+function flipGrid(grid) {
   for (let i = 0; i < 4; i++) {
     grid[i].reverse();
   }
+  return grid;
+}
+
+function rotateGrid(grid) {
+  let newGrid = blankGrid();
+  for (let i = 0; i < 4; i++) {
+    for (let j = 0; j < 4; j++) {
+      newGrid[i][j] = grid[j][i];
+    }
+  }
+  return newGrid;
 }
 
 // one "move"
 function keyPressed() {
   console.log(keyCode);
   let flipped = false;
+  let rotated = false;
+  let played = true;
   if (keyCode === DOWN_ARROW) {
 // do nothing
   } else if (keyCode === UP_ARROW) {
-    flip(grid);
+    grid = flipGrid(grid);
     flipped = true;
+  } else if (keyCode === RIGHT_ARROW) {
+    grid = rotateGrid(grid);
+    rotated = true;
+  } else if (keyCode === LEFT_ARROW) {
+    grid = rotateGrid(grid);
+    grid = flipGrid(grid);
+    rotated = true;
+    flipped = true;
+  } else {
+    played = false;
   }
 
 
+  if (played) {
+    let past = copyGrid(grid);
+    for (let i = 0; i < 4; i++) {
+      grid[i] = operate(grid[i]);
+   }
+    let changed = compare(past, grid);
 
-  let past = copyGrid(grid);
-  for (let i = 0; i < 4; i++) {
-    grid[i] = operate(grid[i]);
-  }
-  let changed = compare(past, grid);
-
-  if (flipped) {
-    flip(grid);
-  }
-
-  if (changed) {
-    addNumber();
+    if (flipped) {
+      grid = flipGrid(grid);
     }
+
+    if (rotated) {
+      grid = rotateGrid(grid);
+      grid = rotateGrid(grid);
+      grid = rotateGrid(grid);
+    }
+
+    if (changed) {
+      addNumber();
+    }
+  }
 }
 
 
