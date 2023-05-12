@@ -81,7 +81,7 @@ function drawGrid() {
       noFill();
       strokeWeight(2);
       let val = grid[i][j];
-      let s = val.toString;
+      let s = val.toString();
       stroke(0);
       if (val != 0) {
         fill(colorSize[s].color);
@@ -89,7 +89,7 @@ function drawGrid() {
         noFill();
       }
       rect(i*w, j*w, w, w);
-      if (val != 0) {
+      if (val !== 0) {
         textAlign(CENTER, CENTER);
         noStroke();
         fill(0);
