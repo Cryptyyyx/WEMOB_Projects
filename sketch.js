@@ -1,10 +1,12 @@
 let grid;
+let grid_new;
 let score = 0;
 
 function setup() {
   createCanvas(400, 400);
   noLoop();
   grid = blankGrid();
+  grid_new = blankGrid();
   addNumber();
   addNumber();
   updateCanvas();
@@ -12,27 +14,31 @@ function setup() {
 
 // one "move"
 function keyPressed() {
-  console.log(keyCode);
   let flipped = false;
   let rotated = false;
   let played = true;
-  if (keyCode === DOWN_ARROW) {
-// do nothing
-  } else if (keyCode === UP_ARROW) {
-    grid = flipGrid(grid);
-    flipped = true;
-  } else if (keyCode === RIGHT_ARROW) {
-    grid = rotateGrid(grid);
-    rotated = true;
-  } else if (keyCode === LEFT_ARROW) {
-    grid = rotateGrid(grid);
-    grid = flipGrid(grid);
-    rotated = true;
-    flipped = true;
-  } else {
-    played = false;
-  }
 
+  switch(keyCode) {
+    case DOWN_ARROW:
+    // do nothing
+    break;
+    case UP_ARROW:
+    grid = flipGrid(grid);
+    flipped = true;
+    break;
+    case RIGHT_ARROW:
+    grid = transposeGrid(grid, 1);
+    rotated = true;
+    break;
+    case LEFT_ARROW:
+    grid = transposeGrid(grid, 1);
+    grid = flipGrid(grid);
+    rotated = true;
+    flipped = true;
+    break;
+    default:
+      played = false;
+  }
 
   if (played) {
     let past = copyGrid(grid);
@@ -46,9 +52,7 @@ function keyPressed() {
     }
 
     if (rotated) {
-      grid = rotateGrid(grid);
-      grid = rotateGrid(grid);
-      grid = rotateGrid(grid);
+      grid = transposeGrid(grid, -1);
     }
 
     if (changed) {
@@ -82,13 +86,20 @@ function drawGrid() {
       strokeWeight(2);
       let val = grid[i][j];
       let s = val.toString();
-      stroke(0);
+      if (grid_new[i][j] === 1) {
+        stroke(200, 0, 200);
+        strokeWeight(16);
+        grid_new[i][j] = 0;
+      } else {
+        strokeWeight(4);
+        stroke(0);
+      }
       if (val != 0) {
         fill(colorSize[s].color);
       } else {
         noFill();
       }
-      rect(i*w, j*w, w, w);
+      rect(i*w, j*w, w, w, 30);
       if (val !== 0) {
         textAlign(CENTER, CENTER);
         noStroke();
