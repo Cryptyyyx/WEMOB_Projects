@@ -1,0 +1,354 @@
+zgv <!DOCTYPE html>
+<html lang="en-US">
+    <head>
+        <meta charset="utf-8" />
+        <title> Jetpack Joyride </title>
+        <style>
+            * {
+                background: rgb(51, 49, 49);
+                padding: 0;
+                margin: 0;
+            }
+            canvas {
+                background: #eee;
+                display: block;
+                margin: 0 auto;
+            }
+        </style>
+    </head>
+    <body>
+        <b> Jetpack Joyride </b>
+        <canvas id="GameCanvas" width="800" height="500"></canvas>
+
+        <script>
+
+                                            // Here all the variables and constants of every element get declared
+
+// Canvas
+
+            const canvas = document.getElementById("GameCanvas");
+            const context = canvas.getContext("2d");
+
+            const interval = setInterval(draw, 10);
+
+// Room heights on canvas
+
+            let floorHeight = 450;
+            let roofHeight = 50;
+            let floorElementPosition = {x: canvas.width, y: floorHeight};
+            let floorElementDimension = {x: 10, y: 50};
+            let distance = 0;
+            
+// Player character
+
+            let playerPosition = {x: 100, y: 200};
+            let playerDimension = {x: 50, y: 100};
+            let playerSpeed = 0;
+            let playerMaxSpeed = 6;
+            const gravity = 0.3;
+            const playerAcceleration = 7;
+            let coinCounter = 0;
+            let lives = 3;
+
+// Coin
+
+            const coinRadius = 20;
+            let coinPosition = {x: canvas.width, y:generateRandomInt(roofHeight + coinRadius, floorHeight - coinRadius)};
+
+// Obstacle1
+
+            let obstacle1Dimension = {x: generateRandomInt(50, 200), y: generateRandomInt(20, 50)};
+            let obstacle1Position = {x: canvas.width + generateRandomInt(100, 1000), y:generateRandomInt(0, floorHeight - obstacle1Dimension.y)};
+
+// Obstacle2
+
+            let obstacle2Dimension = {x: generateRandomInt(20, 50), y: generateRandomInt(50, 200)};
+            let obstacle2Position = {x: canvas.width + generateRandomInt(1000, 2000), y:generateRandomInt(roofHeight, floorHeight - obstacle2Dimension.y)};
+
+// Event listener
+
+            document.addEventListener("keydown", keyDownHandler, false);
+            document.addEventListener("keyup", keyUpHandler, false);
+            let spacePressed = false;
+
+// Misc
+            let gameSpeedValue = -10;
+            let gameSpeedAcceleration = 1.05;
+            let gameSpeedDeceleration = 0.8;
+
+                                            // Here all the functions transforming and using the previously variables and constants
+
+// Code for event handler
+
+            function keyDownHandler(event) {
+                if (event.code === "Space") {
+                    if(playerSpeed >= 0){
+                        playerSpeed = 0;
+                    }
+                    playerSpeed = -playerAcceleration;
+                    spacePressed = true;
+                }
+            }
+
+            function keyUpHandler(event) {
+                if (event.code === "Space") {
+                    spacePressed = false; 
+                }
+            }
+
+// Code for the player character
+
+            function drawPlayer() {
+                context.beginPath();
+                context.rect(playerPosition.x, playerPosition.y, playerDimension.x, playerDimension.y);
+                context.fillStyle = "#0095DD";
+                context.fill();
+                context.closePath();
+            }
+
+            function movePlayer() {
+                playerPosition.y += playerSpeed;
+                if(!spacePressed){
+                    playerSpeed += gravity;
+                }
+
+                if (playerPosition.y + playerDimension.y >=  floorHeight) {
+                    playerPosition.y = floorHeight - playerDimension.y;
+                    playerSpeed = 0;
+                }
+                if (playerPosition.y <= roofHeight) {
+                    playerPosition.y = roofHeight;
+                }
+                if (playerSpeed > playerMaxSpeed) {
+                    playerSpeed = playerMaxSpeed;
+                }
+                if (playerSpeed < -playerMaxSpeed) {
+                    playerSpeed = -playerMaxSpeed;
+                }
+            }
+
+// Code for the coin
+
+            function drawCoin() {
+                context.beginPath();
+                context.arc(coinPosition.x, coinPosition.y, coinRadius, 0, Math.PI * 2);
+                context.fillStyle = "#FFFF00";
+                context.fill();
+                context.closePath();
+            }
+
+            function moveCoin() {
+                coinPosition.x += gameSpeedValue;;
+            }
+
+            function respawnCoin() {
+
+                if (coinPosition.x <= - coinRadius ) {
+                    coinPosition.x = canvas.width + coinRadius + generateRandomInt(100, 2000);
+                    coinPosition.y = generateRandomInt(roofHeight + coinRadius, floorHeight - coinRadius);
+                }
+            }
+            
+            function collectCoin() {
+                if (coinPosition.x + coinRadius >= playerPosition.x 
+                && coinPosition.x + coinRadius <= playerPosition.x + playerDimension.x
+                && coinPosition.y + coinRadius >= playerPosition.y
+                && coinPosition.y - coinRadius <= playerPosition.y + playerDimension.y) {
+                    coinCounter++;
+                    coinPosition.x = canvas.width + coinRadius + generateRandomInt(100, 2000);
+                    coinPosition.y = generateRandomInt(roofHeight + coinRadius, floorHeight - coinRadius);
+                }
+            }
+
+// Code for obstacle1
+
+            function drawObstacle1() {
+                context.beginPath();
+                context.rect(obstacle1Position.x, obstacle1Position.y, obstacle1Dimension.x, obstacle1Dimension.y);
+                context.fillStyle = "#FF0000";
+                context.fill();
+                context.closePath();
+            }
+
+            function moveObstacle1() {
+                obstacle1Position.x += gameSpeedValue;
+            }
+
+            function respawnObstacle1() {
+                if (obstacle1Position.x <= -obstacle1Dimension.x) {
+                    obstacle1Position.x = canvas.width + generateRandomInt(100, 1000);
+                    obstacle1Position.y = generateRandomInt(0, floorHeight - obstacle1Dimension.y)
+                }
+            }
+
+            function hitObstacle1() {
+                if  (obstacle1Position.x <= playerPosition.x + playerDimension.x
+                && ((obstacle1Position.y >= playerPosition.y && obstacle1Position.y <= playerPosition.y + playerDimension.y)
+                || (obstacle1Position.y + obstacle1Dimension.y >= playerPosition.y && obstacle1Position.y + obstacle1Dimension.y <= playerPosition.y + playerDimension.y)
+                || (obstacle1Position.y <= playerPosition.y && obstacle1Position.y + obstacle1Dimension.y >= playerPosition.y + playerDimension.y))) {
+                    lives--;
+                    obstacle1Position.x = canvas.width + generateRandomInt(100, 1000);
+                    obstacle1Position.y = generateRandomInt(0, floorHeight - obstacle1Dimension.y)
+                    gameSpeedValue *= gameSpeedDeceleration;
+                }
+            }
+
+// Code for obstacle1
+
+            function drawObstacle2() {
+                context.beginPath();
+                context.rect(obstacle2Position.x, obstacle2Position.y, obstacle2Dimension.x, obstacle2Dimension.y);
+                context.fillStyle = "#00FF00";
+                context.fill();
+                context.closePath();
+            }
+
+            function moveObstacle2() {
+                obstacle2Position.x += gameSpeedValue;
+            }
+
+            function respawnObstacle2() {
+                if (obstacle2Position.x <= -obstacle2Dimension.x) {
+                    obstacle2Position.x = canvas.width + generateRandomInt(1000, 2000);
+                    obstacle2Position.y = generateRandomInt(roofHeight, floorHeight - obstacle2Dimension.y);
+                }
+            }
+
+            function hitObstacle2() {
+                if  (obstacle2Position.x <= playerPosition.x + playerDimension.x
+                && ((obstacle2Position.y >= playerPosition.y && obstacle2Position.y <= playerPosition.y + playerDimension.y)
+                || (obstacle2Position.y + obstacle2Dimension.y >= playerPosition.y && obstacle2Position.y + obstacle2Dimension.y <= playerPosition.y + playerDimension.y)
+                || (obstacle2Position.y <= playerPosition.y && obstacle2Position.y + obstacle2Dimension.y >= playerPosition.y + playerDimension.y))) {
+                    lives--;
+                    obstacle2Position.x = canvas.width + generateRandomInt(1000, 2000);
+                    obstacle2Position.y = generateRandomInt(roofHeight, floorHeight - obstacle2Dimension.y);
+                    gameSpeedValue *= gameSpeedDeceleration;
+                }
+            }
+
+// Code for the floor/background
+
+            function drawFloor() {
+                context.beginPath();
+                context.rect(0, floorHeight, canvas.width, canvas.height);
+                context.fillStyle = "#808080"
+                context.fill();
+                context.closePath();
+            }
+
+            function drawFloorElement() {
+                context.beginPath();
+                context.rect(floorElementPosition.x, floorElementPosition.y, floorElementDimension.x, floorElementDimension.y);
+                context.fillStyle = "#000000"
+                context.fill();
+                context.closePath();
+            }
+
+            function moveFloorElement() {
+                floorElementPosition.x += gameSpeedValue;
+            }
+
+            function respawnFloorElement() {
+                if (floorElementPosition.x <= - floorElementDimension.x) {
+                    floorElementPosition.x = canvas.width;
+                    distance++;
+                }
+            }
+
+// Lose screen
+
+            function drawLoseScreen() {
+                context.beginPath();
+                context.font = "48px sans-serif";
+                context.fillStyle = "#0095DD";
+                context.textAlign = "center";
+                context.fillText("You Lose!", canvas.width/2, canvas.height/2);
+                context.closePath();
+            }
+
+// Miscelanious functions
+
+            function increaseGameSpeed() {
+                gameSpeedValue *= gameSpeedAcceleration;
+                if (gameSpeedValue <= -100) {
+                    gameSpeedValue = -100;
+                }
+            }
+
+            function drawDebugValue1() {
+                context.font = "16px Arial";
+                context.fillStyle = "#0095DD";
+                context.fillText(`lives: ${lives}`, 8, 20);
+            }
+
+            function drawDebugValue2() {
+                context.font = "16px Arial";
+                context.fillStyle = "#0095DD";
+                context.fillText(`Distance: ${distance * 100}`, 308, 20);
+            }
+
+            function generateRandomInt(min, max) {
+                return Math.floor(Math.random() * (max - min + 1) + min);
+            }
+
+                                            // Here is the main draw() function where all the functions are called to make the game happening
+
+// Main function
+
+            function draw() {
+
+                context.clearRect(0, 0, canvas.width, canvas.height);
+
+                if (lives <= 0) {
+
+// Lose screen when lives run out
+
+                    drawLoseScreen();
+                    clearInterval(Interval);
+                }
+                else {
+
+// Debug stuff
+
+                    drawDebugValue1();
+                    drawDebugValue2();
+
+// Player
+
+                    drawPlayer();
+                    movePlayer();
+
+// Coin
+
+                    drawCoin();
+                    moveCoin();
+                    respawnCoin();
+                    collectCoin();
+
+// Obstacle1
+
+                    drawObstacle1();
+                    moveObstacle1();
+                    respawnObstacle1();
+                    hitObstacle1();
+
+// Obstacle2
+                    drawObstacle2();
+                    moveObstacle2();
+                    respawnObstacle2();
+                    hitObstacle2();
+
+// Floor / background
+                    drawFloor();
+                    drawFloorElement();
+                    moveFloorElement();
+                    respawnFloorElement();
+                }
+            }
+
+// Game speed
+
+            setInterval(increaseGameSpeed, 2000);
+        </script>
+    </body>
+</html>
