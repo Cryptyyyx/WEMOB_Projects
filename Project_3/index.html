@@ -2,13 +2,49 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>JS-GameEngine game</title>
+    <script src="https://cdn.babylonjs.com/babylon.max.js"></script>
+    <style>
+        #canvas {
+            width:100%;
+            height:100%;
+        }
+    </style>
 </head>
 <body>
-    <h1>Hello</h1>
+    <canvas id="canvas"></canvas>
 
-    <script src="./script.js"></script>
+    <script>
+        window.addEventListener("DOMContentLoaded", function() {
+            var canvas = document.getElementById("canvas");
+            var engine = new BABYLON.Engine(canvas, true);
+
+            var createScene = function() {
+                var scene = new BABYLON.Scene(engine);
+                scene.clearColor = BABYLON.Color3.White();
+
+                //var camera = new BABYLON.FreeCamera("camera1", new BABYLON.Vector3(0, 6, -10), scene);
+                var box = BABYLON.Mesh.CreateBox("Box", 4.0, scene);
+                var camera = new BABYLON.ArcRotateCamera("arcCamera", BABYLON.Tools.ToRadians(45), BABYLON.Tools.ToRadians(45), 10.0, box.position, scene);
+
+                //camera.setTarget(BABYLON.Vector3.Zero());
+                camera.attachControl(canvas, true);
+
+                /*camera.keysUp.push(87);
+                camera.keysDown.push(83);
+                camera.keysLeft.push(65);
+                camera.keysRight.push(68);*/
+
+                return scene;
+            }
+
+            var scene = createScene();
+
+            engine.runRenderLoop(function() {
+                scene.render();
+            });
+
+        });
+    </script>
 </body>
 </html>
