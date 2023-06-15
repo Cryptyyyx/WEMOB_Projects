@@ -1,10 +1,12 @@
 import Phaser from '../lib/phaser.js'
 
-import Item from '../game/item.js'
+import Item from '../game/Item.js'
 
 export default class Game extends Phaser.Scene {
 
     itemsCollected = 0
+
+    currentScore = 0
 
     /** @type {Phaser.GameObjects.Text} */
     itemsCollectedText
@@ -47,18 +49,26 @@ export default class Game extends Phaser.Scene {
         super('game')
     }
 
+    init() {
+        this.itemsCollected = 0
+    }
+
     preload() {
-        //load background image
-        this.load.image('background', 'assets/bg_layer1.png')
 
         //load the platform image
         this.load.image('platform', 'assets/ground_grass.png')
 
-        //load the player stand animation
+        //load the player stand image
         this.load.image('player-stand', 'assets/bunny1_stand.png')
 
         //load item image
         this.load.image('item', 'assets/carrot.png')
+
+        //load placer jump image
+        this.load.image('player-jump', 'assets/bunny1_jump.png')
+
+        //load jump audio
+        this.load.audio('jump', 'assets/sfx/phaseJump1.ogg')
 
         //load the input-cursor
         this.cursors = this.input.keyboard.createCursorKeys()
@@ -152,7 +162,16 @@ export default class Game extends Phaser.Scene {
         const touchingDown = this.player.body.touching.down
 
         if (touchingDown) {
-            this.player.setVelocityY(-300)
+            this.player.setVelocityY(-400)
+
+            this.player.setTexture('player-jump')
+
+            this.sound.play('jump')
+        }
+
+        const vy = this.player.body.velocity.y
+        if (vy > 0 && this.player.texture.key !== 'player-stand') {
+            this.player.setTexture('player-stand')
         }
 
         this.player.body.checkCollision.up = false
@@ -173,7 +192,7 @@ export default class Game extends Phaser.Scene {
 
         const bottomPlatform = this.findBottomMostPlatform()
         if (this.player.y > bottomPlatform.y + 200) {
-            console.log('game over')
+            this.scene.start('game-over',  { score: this.currentScore})
         }
     }
 
@@ -204,6 +223,8 @@ export default class Game extends Phaser.Scene {
 
         //increment itemsCollected by 1
         this.itemsCollected++
+
+        this.currentScore = this.itemsCollected
 
         //update itemsCollectedText
         const value = 'items: ' + this.itemsCollected
