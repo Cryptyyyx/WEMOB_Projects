@@ -8,6 +8,8 @@ export default class Game extends Phaser.Scene {
 
     currentScore = 0
 
+    doubleJump = 2
+
     /** @type {Phaser.GameObjects.Text} */
     itemsCollectedText
 
@@ -161,12 +163,17 @@ export default class Game extends Phaser.Scene {
         //check player bottom collision
         const touchingDown = this.player.body.touching.down
 
-        if (touchingDown) {
+        if (touchingDown && this.cursors.space.isDown) {
             this.player.setVelocityY(-400)
 
             this.player.setTexture('player-jump')
 
             this.sound.play('jump')
+        }
+
+        if (!touchingDown && this.cursors.space.isDown && this.doubleJump > 0) {
+            this.player.setVelocityY(-400)
+            this.doubleJump--
         }
 
         const vy = this.player.body.velocity.y
@@ -178,10 +185,10 @@ export default class Game extends Phaser.Scene {
         this.player.body.checkCollision.left = false
         this.player.body.checkCollision.right = false
 
-        if (this.cursors.left.isDown && !touchingDown) {
+        if (this.cursors.left.isDown) {
             this.player.setVelocityX(-200)
         }
-        else if (this.cursors.right.isDown && !touchingDown) {
+        else if (this.cursors.right.isDown) {
             this.player.setVelocityX(200)
         }
         else {
@@ -229,6 +236,11 @@ export default class Game extends Phaser.Scene {
         //update itemsCollectedText
         const value = 'items: ' + this.itemsCollected
         this.itemsCollectedText.text = value
+
+        //increase double-jump counter if itemsCollected >= 10
+        if (this.itemsCollected % 10 == 0) {
+            this.doubleJump++
+        }
     }
 
     findBottomMostPlatform() {
