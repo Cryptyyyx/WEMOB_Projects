@@ -10,6 +10,9 @@ export default class Game extends Phaser.Scene {
 
     doubleJump = 2
 
+    /** @type  {Phaser.GameObjects.Text} */
+    doubleJumpText
+
     /** @type {Phaser.GameObjects.Text} */
     itemsCollectedText
 
@@ -28,6 +31,7 @@ export default class Game extends Phaser.Scene {
     /**
      * @param {Phaser.GameObjects.Sprite} sprite
      */
+
     addItemAbove(sprite) {
         const y = sprite.y - sprite.displayHeight
 
@@ -53,6 +57,7 @@ export default class Game extends Phaser.Scene {
 
     init() {
         this.itemsCollected = 0
+        this.doubleJump = 2
     }
 
     preload() {
@@ -127,7 +132,11 @@ export default class Game extends Phaser.Scene {
         )
 
         const style = { color: '#000', fontSize: 24 }
-        this.itemsCollectedText = this.add.text(240, 10, 'items: 0', style)
+        this.itemsCollectedText = this.add.text(400, 10, 'items: 0', style)
+        .setScrollFactor(0)
+        .setOrigin(0.5, 0)
+
+        this.doubleJumpText = this.add.text(600, 600, 'double-jumps: 2', style)
         .setScrollFactor(0)
         .setOrigin(0.5, 0)
 
@@ -174,9 +183,16 @@ export default class Game extends Phaser.Scene {
         }
 
         //Double-jump
-        if (!touchingDown && this.cursors.space.isDown && this.doubleJump > 0) {
-            this.player.setVelocityY(-400)
-            this.doubleJump--
+        if (Phaser.Input.Keyboard.JustDown(this.cursors.space) && this.doubleJump > 0) {
+            if (!touchingDown) {
+                this.player.setVelocityY(-400);
+                this.doubleJump--;
+                this.doubleJumpText.setText('double-jump: ' + this.doubleJump)
+                this.player.setTexture('player-jump')
+                this.sound.play('jump')
+            } else {
+                this.player.setVelocityY(-400);
+            }
         }
 
         //swich texture of player once they start falling down
@@ -211,6 +227,8 @@ export default class Game extends Phaser.Scene {
         if (this.player.y > bottomPlatform.y + 200) {
             this.scene.start('game-over',  { score: this.currentScore})
         }
+
+    
     }
 
     /**
@@ -244,12 +262,12 @@ export default class Game extends Phaser.Scene {
         this.currentScore = this.itemsCollected
 
         //update itemsCollectedText
-        const value = 'items: ' + this.itemsCollected
-        this.itemsCollectedText.text = value
+        this.itemsCollectedText.setText('items: ' + this.itemsCollected)
 
-        //increase double-jump counter if itemsCollected >= 10
-        if (this.itemsCollected % 10 == 0) {
+        //increase double-jump counter if itemsCollected >= 5
+        if (this.itemsCollected % 5 == 0) {
             this.doubleJump++
+            this.doubleJumpText.setText('double-jump: ' + this.doubleJump)
         }
     }
 

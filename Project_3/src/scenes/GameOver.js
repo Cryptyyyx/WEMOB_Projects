@@ -29,6 +29,13 @@ export default class GameOver extends Phaser.Scene {
         })
         .setOrigin(0.5)
 
+        //Restart game message
+        this.add.text(width * 0.5, height -150 , 'press SPACE to restart', {
+            fontSize: 25,
+            color: '#000000'
+        })
+        .setOrigin(0.5)
+
         this.input.keyboard.once('keydown-SPACE', () => {
             this.scene.start('game')
         })
