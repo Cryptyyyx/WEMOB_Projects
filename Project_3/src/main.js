@@ -8,7 +8,7 @@ import GameStart from './scenes/GameStart.js'
 
 export default new Phaser.Game({
     type: Phaser.AUTO,
-    width: 480,
+    width: 800,
     height: 640,
     scene: [GameStart, Game, GameOver],
     physics: {

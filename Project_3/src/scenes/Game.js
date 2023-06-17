@@ -142,6 +142,7 @@ export default class Game extends Phaser.Scene {
             const scrollY = this.cameras.main.scrollY
             if (platform.y >= scrollY + 700) {
                 platform.y = scrollY - Phaser.Math.Between(50, 100)
+                platform.x = Phaser.Math.Between(80, 400)
                 platform.body.updateFromGameObject()
                 this.addItemAbove(platform)
             }
@@ -163,6 +164,7 @@ export default class Game extends Phaser.Scene {
         //check player bottom collision
         const touchingDown = this.player.body.touching.down
 
+        //player jump while on platform
         if (touchingDown && this.cursors.space.isDown) {
             this.player.setVelocityY(-400)
 
@@ -171,32 +173,40 @@ export default class Game extends Phaser.Scene {
             this.sound.play('jump')
         }
 
+        //Double-jump
         if (!touchingDown && this.cursors.space.isDown && this.doubleJump > 0) {
             this.player.setVelocityY(-400)
             this.doubleJump--
         }
 
+        //swich texture of player once they start falling down
         const vy = this.player.body.velocity.y
         if (vy > 0 && this.player.texture.key !== 'player-stand') {
             this.player.setTexture('player-stand')
         }
 
+        //diable up-/left-/right- collision for player
         this.player.body.checkCollision.up = false
         this.player.body.checkCollision.left = false
         this.player.body.checkCollision.right = false
 
+        //move left
         if (this.cursors.left.isDown) {
             this.player.setVelocityX(-200)
         }
+        //move right
         else if (this.cursors.right.isDown) {
             this.player.setVelocityX(200)
         }
+        //stop moving horizontally
         else {
             this.player.setVelocityX(0)
         }
 
+        //allows player to loop around the screen
         this.horizontalWrap(this.player)
 
+        //start game-over scene once player fally beyond last platform
         const bottomPlatform = this.findBottomMostPlatform()
         if (this.player.y > bottomPlatform.y + 200) {
             this.scene.start('game-over',  { score: this.currentScore})
