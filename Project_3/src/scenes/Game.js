@@ -142,20 +142,35 @@ export default class Game extends Phaser.Scene {
 
     }
 
-    update(t, dt) {
+    update() {
 
-        this.platforms.children.iterate(child => {
+        //this.platforms.children.iterate(child => {
+        //    /** @type {Phaser.Physics.Arcade.Sprite} */
+        //    const platform = child
+
+        //    const scrollY = this.cameras.main.scrollY
+        //    if (platform.y >= scrollY + 700) {
+        //        platform.y = scrollY - Phaser.Math.Between(50, 100)
+        //        platform.x = Phaser.Math.Between(80, 400)
+        //        platform.body.updateFromGameObject()
+        //        this.addItemAbove(platform)
+        //    }
+        //})
+
+        const lowerFifth = this.cameras.main.height * 0.8; // Lower fifth of the screen
+
+        this.platforms.children.iterate((platform) => {
             /** @type {Phaser.Physics.Arcade.Sprite} */
-            const platform = child
-
-            const scrollY = this.cameras.main.scrollY
-            if (platform.y >= scrollY + 700) {
-                platform.y = scrollY - Phaser.Math.Between(50, 100)
-                platform.x = Phaser.Math.Between(80, 400)
-                platform.body.updateFromGameObject()
+            const platformY = platform.y - this.cameras.main.scrollY;
+            
+            if (platformY >= lowerFifth) {
+                // Relocate the platform above the screen
+                platform.y = this.cameras.main.scrollY - Phaser.Math.Between(50, 100);
+                platform.x = Phaser.Math.Between(80, 400);
+                platform.body.updateFromGameObject();
                 this.addItemAbove(platform)
             }
-        })
+        });
 
         this.items.children.iterate(child => {
             /**  @type {Phaser.Physics.Arcade.Sprite} */
@@ -195,7 +210,7 @@ export default class Game extends Phaser.Scene {
             }
         }
 
-        //swich texture of player once they start falling down
+        //switch texture of player once they start falling down
         const vy = this.player.body.velocity.y
         if (vy > 0 && this.player.texture.key !== 'player-stand') {
             this.player.setTexture('player-stand')
@@ -222,7 +237,7 @@ export default class Game extends Phaser.Scene {
         //allows player to loop around the screen
         this.horizontalWrap(this.player)
 
-        //start game-over scene once player fally beyond last platform
+        //start game-over scene once player falls beyond last platform
         const bottomPlatform = this.findBottomMostPlatform()
         if (this.player.y > bottomPlatform.y + 200) {
             this.scene.start('game-over',  { score: this.currentScore})
