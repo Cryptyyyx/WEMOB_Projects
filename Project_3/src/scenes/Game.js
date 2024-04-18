@@ -36,19 +36,19 @@ export default class Game extends Phaser.Scene {
         const y = sprite.y - sprite.displayHeight
 
         /** @type {Phaser.Physics.Arcade.Sprite} */
-    const item = this.items.get(sprite.x, y, 'item')
+        const item = this.items.get(sprite.x, y, 'item')
 
-    item.setActive(true)
-    item.setVisible(true)
+        item.setActive(true)
+        item.setVisible(true)
 
-    this.add.existing(item)
+        this.add.existing(item)
 
-    //update physics body size
-    item.body.setSize(item.width, item.height)
+        //update physics body size
+        item.body.setSize(item.width, item.height)
 
-    this.physics.world.enable(item)
+        this.physics.world.enable(item)
 
-    return item
+        return item
     }
 
     constructor() {
@@ -84,11 +84,11 @@ export default class Game extends Phaser.Scene {
     create() {
         //add background image
         this.add.image(240, 320, 'background')
-        .setScrollFactor(1, 0)
+            .setScrollFactor(1, 0)
 
         //create group
         this.platforms = this.physics.add.staticGroup()
-        
+
         //5 instances of that group
         for (let i = 0; i < 5; i++) {
             const x = Phaser.Math.Between(80, 400)
@@ -104,11 +104,11 @@ export default class Game extends Phaser.Scene {
         }
         //create player character
         this.player = this.physics.add.sprite(240, 320, 'player-stand')
-        .setScale(0.5)
-        
+            .setScale(0.5)
+
         //add collision to player
         this.physics.add.collider(this.platforms, this.player)
-        
+
         //camera following player
         this.cameras.main.startFollow(this.player)
 
@@ -133,12 +133,12 @@ export default class Game extends Phaser.Scene {
 
         const style = { color: '#000', fontSize: 24 }
         this.itemsCollectedText = this.add.text(400, 10, 'items: 0', style)
-        .setScrollFactor(0)
-        .setOrigin(0.5, 0)
+            .setScrollFactor(0)
+            .setOrigin(0.5, 0)
 
         this.doubleJumpText = this.add.text(600, 600, 'double-jumps: 2', style)
-        .setScrollFactor(0)
-        .setOrigin(0.5, 0)
+            .setScrollFactor(0)
+            .setOrigin(0.5, 0)
 
     }
 
@@ -162,7 +162,7 @@ export default class Game extends Phaser.Scene {
         this.platforms.children.iterate((platform) => {
             /** @type {Phaser.Physics.Arcade.Sprite} */
             const platformY = platform.y - this.cameras.main.scrollY;
-            
+
             if (platformY >= lowerFifth) {
                 // Relocate the platform above the screen
                 platform.y = this.cameras.main.scrollY - Phaser.Math.Between(50, 100);
@@ -240,10 +240,10 @@ export default class Game extends Phaser.Scene {
         //start game-over scene once player falls beyond last platform
         const bottomPlatform = this.findBottomMostPlatform()
         if (this.player.y > bottomPlatform.y + 200) {
-            this.scene.start('game-over',  { score: this.currentScore})
+            this.scene.start('game-over', { score: this.currentScore })
         }
 
-    
+
     }
 
     /**
